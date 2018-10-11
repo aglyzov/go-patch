@@ -20,17 +20,19 @@ type Patch struct {
     NonExisting []byte  // fields not present in the target are also ignored
 }
 
-var a = Target{
+var e = Employee{
     FirstName: "Anakin",
     LastName:  "Skywalker",
     Salary:    123,
     Extra:     "unchanged",
 }
 var p = Patch{
-    FirstName: "Darth",
-    LastName:  "Vader",
+    FirstName:   "Darth",
+    LastName:    "Vader",
+    unexported:  true,
+    NonExisting: []byte("ignored"),
 }
-var changed, err = patch.Struct(&a, p)
+var changed, err = patch.Struct(&e, p)
 
-// now `a` is {"Darth", "Vader", 123, "unchanged"}
+// now `e` is {"Darth", "Vader", 123, "unchanged"}
 ```
