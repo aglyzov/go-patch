@@ -24,10 +24,10 @@ func Test_Struct_Ignores_EmptyPatch(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.False(t, chg)
-	assert.Equal(t, a.FirstName, "Anakin")
-	assert.Equal(t, a.LastName, "Skywalker")
-	assert.Equal(t, a.Salary, 123)
-	assert.Equal(t, a.Extra, "unchanged")
+	assert.Equal(t, "Anakin", a.FirstName)
+	assert.Equal(t, "Skywalker", a.LastName)
+	assert.Equal(t, 123, a.Salary)
+	assert.Equal(t, "unchanged", a.Extra)
 }
 
 func Test_Struct_Ignores_UnknownFields(t *testing.T) {
@@ -56,9 +56,9 @@ func Test_Struct_Ignores_UnknownFields(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.False(t, chg)
-	assert.Equal(t, a.FirstName, "Anakin")
-	assert.Equal(t, a.LastName, "Skywalker")
-	assert.Equal(t, a.Salary, 123)
+	assert.Equal(t, "Anakin", a.FirstName)   // unchanged
+	assert.Equal(t, "Skywalker", a.LastName) // unchanged
+	assert.Equal(t, 123, a.Salary)           // unchanged
 }
 
 func Test_Struct_Ignores_UnexportedFields(t *testing.T) {
@@ -85,8 +85,8 @@ func Test_Struct_Ignores_UnexportedFields(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, chg)
-	assert.Equal(t, a.Exported, "wookie")
-	assert.Equal(t, a.unexported, "private")
+	assert.Equal(t, "wookie", a.Exported)
+	assert.Equal(t, "private", a.unexported)
 }
 
 func Test_Struct_Ignores_ZeroValueFields(t *testing.T) {
@@ -117,9 +117,9 @@ func Test_Struct_Ignores_ZeroValueFields(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, chg)
-	assert.Equal(t, a.Name, "Chubacca")
-	assert.Equal(t, a.Salary, 15)
-	assert.Equal(t, a.OnDuty, true)
+	assert.Equal(t, "Chubacca", a.Name)
+	assert.Equal(t, 15, a.Salary)   // unchanged
+	assert.Equal(t, true, a.OnDuty) // unchanged
 }
 
 func Test_Struct_Handles_Pointers(t *testing.T) {
@@ -154,10 +154,10 @@ func Test_Struct_Handles_Pointers(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, chg)
-	assert.Equal(t, a.FirstName, "Darth")
-	assert.Equal(t, a.LastName, "Vader")
-	assert.Equal(t, a.Salary, 0)
-	assert.Equal(t, a.OnDuty, false)
+	assert.Equal(t, "Darth", a.FirstName)
+	assert.Equal(t, "Vader", a.LastName)
+	assert.Equal(t, 0, a.Salary)      // changed despite it's a zero
+	assert.Equal(t, false, a.OnDuty)  // changed despite it's a zero
 }
 
 func Test_Struct_Detects_WrongType(t *testing.T) {
@@ -183,9 +183,46 @@ func Test_Struct_Detects_WrongType(t *testing.T) {
 	var _, err = Struct(&a, p)
 
 	assert.Error(t, err)
-	assert.Equal(t, a.Salary, 123)
+	assert.Equal(t, 123, a.Salary) // unchanged
 }
 
+func Test_Struct_Patches_EmbeddedWithFlat(t *testing.T) {
+
+	type Name struct {
+		FirstName string
+		LastName  string
+	}
+	type Target struct {
+		Name   // embedded
+		Salary int
+	}
+	type Patch struct {
+		FirstName string
+		LastName  string
+		Salary    int
+	}
+
+	var a = Target{
+		Name: Name{
+			FirstName: "Anakin",
+			LastName:  "Skywalker",
+		},
+		Salary: 123,
+	}
+	var p = Patch{
+		FirstName: "Darth",
+		LastName:  "Vader",
+		Salary:    100500,
+	}
+
+	var chg, err = Struct(&a, p)
+
+	assert.NoError(t, err)
+	assert.True(t, chg)
+	assert.Equal(t, "Darth", a.FirstName)
+	assert.Equal(t, "Vader", a.LastName)
+	assert.Equal(t, 100500, a.Salary)
+}
 
 // -- test helpers --
 
