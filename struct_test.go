@@ -224,6 +224,44 @@ func Test_Struct_Patches_EmbeddedWithFlat(t *testing.T) {
 	assert.Equal(t, 100500, a.Salary)
 }
 
+func Test_Struct_Patches_FlatWithEmbedded(t *testing.T) {
+
+	type Target struct {
+		FirstName string
+		LastName  string
+		Salary    int
+	}
+	type Name struct {
+		FirstName string
+		LastName  string
+	}
+	type Patch struct {
+		Name   // embedded
+		Salary int
+	}
+
+	var a = Target{
+        FirstName: "Anakin",
+        LastName:  "Skywalker",
+		Salary: 123,
+	}
+	var p = Patch{
+		Name: Name{
+            FirstName: "Darth",
+            LastName:  "Vader",
+		},
+		Salary:    100500,
+	}
+
+	var chg, err = Struct(&a, p)
+
+	assert.NoError(t, err)
+	assert.True(t, chg)
+	assert.Equal(t, "Darth", a.FirstName)
+	assert.Equal(t, "Vader", a.LastName)
+	assert.Equal(t, 100500, a.Salary)
+}
+
 // -- test helpers --
 
 func strPtr(s string) *string {

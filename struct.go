@@ -16,11 +16,24 @@ import (
 func Struct(target, patch interface{}) (changed bool, err error) {
 
     var dst = structs.New(target)
+    var fields = structs.New(patch).Fields()  // work stack
 
-    for _, srcField := range structs.New(patch).Fields() {
-        if ! srcField.IsExported() || srcField.IsZero() {
-            continue  // skip unexported and zero-value fields
+    for N := len(fields); N > 0; N = len(fields) {
+        var srcField = fields[N-1]  // pop the top
+        fields = fields[:N-1]
+
+        if ! srcField.IsExported() {
+            continue  // skip unexported fields
         }
+        if srcField.IsEmbedded() {
+            // add the embedded fields into the work stack
+            fields = append(fields, srcField.Fields()...)
+            continue
+        }
+        if srcField.IsZero() {
+            continue  // skip zero-value fields
+        }
+
         var name = srcField.Name()
 
         var dstField, ok = dst.FieldOk(name)
