@@ -156,8 +156,8 @@ func Test_Struct_Handles_Pointers(t *testing.T) {
 	assert.True(t, chg)
 	assert.Equal(t, "Darth", a.FirstName)
 	assert.Equal(t, "Vader", a.LastName)
-	assert.Equal(t, 0, a.Salary)      // changed despite it's a zero
-	assert.Equal(t, false, a.OnDuty)  // changed despite it's a zero
+	assert.Equal(t, 0, a.Salary)     // changed despite it's a zero
+	assert.Equal(t, false, a.OnDuty) // changed despite it's a zero
 }
 
 func Test_Struct_Detects_WrongType(t *testing.T) {
@@ -241,16 +241,16 @@ func Test_Struct_Patches_FlatWithEmbedded(t *testing.T) {
 	}
 
 	var a = Target{
-        FirstName: "Anakin",
-        LastName:  "Skywalker",
-		Salary: 123,
+		FirstName: "Anakin",
+		LastName:  "Skywalker",
+		Salary:    123,
 	}
 	var p = Patch{
 		Name: Name{
-            FirstName: "Darth",
-            LastName:  "Vader",
+			FirstName: "Darth",
+			LastName:  "Vader",
 		},
-		Salary:    100500,
+		Salary: 100500,
 	}
 
 	var chg, err = Struct(&a, p)
@@ -259,6 +259,45 @@ func Test_Struct_Patches_FlatWithEmbedded(t *testing.T) {
 	assert.True(t, chg)
 	assert.Equal(t, "Darth", a.FirstName)
 	assert.Equal(t, "Vader", a.LastName)
+	assert.Equal(t, 100500, a.Salary)
+}
+
+func Test_Sub_Structs(t *testing.T) {
+	type TargetPerson struct {
+		FirstName string
+		LastName  string
+	}
+	type Target struct {
+		Contact *TargetPerson
+		Salary  int
+	}
+	type Patch struct {
+		Contact  *TargetPerson
+		Salary   int
+		Whatever string
+	}
+
+	var a = Target{
+		Contact: &TargetPerson{
+			FirstName: "Anakin",
+			LastName:  "Skywalker",
+		},
+		Salary: 123,
+	}
+	var p = Patch{
+		Contact: &TargetPerson{
+			FirstName: "Darth",
+			LastName:  "Vader",
+		},
+		Salary: 100500,
+	}
+
+	var chg, err = Struct(&a, p)
+
+	assert.NoError(t, err)
+	assert.True(t, chg)
+	assert.Equal(t, "Darth", a.Contact.FirstName)
+	assert.Equal(t, "Vader", a.Contact.LastName)
 	assert.Equal(t, 100500, a.Salary)
 }
 
