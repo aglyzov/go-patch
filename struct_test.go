@@ -89,7 +89,7 @@ func Test_Struct_Ignores_UnexportedFields(t *testing.T) {
 	assert.Equal(t, "private", a.unexported)
 }
 
-func Test_Struct_Ignores_ZeroValueFields(t *testing.T) {
+func Test_Struct_Not_Ignores_ZeroValueFields(t *testing.T) {
 
 	type Target struct {
 		Name   string
@@ -118,8 +118,8 @@ func Test_Struct_Ignores_ZeroValueFields(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, chg)
 	assert.Equal(t, "Chubacca", a.Name)
-	assert.Equal(t, 15, a.Salary)   // unchanged
-	assert.Equal(t, true, a.OnDuty) // unchanged
+	assert.Equal(t, 0, a.Salary)
+	assert.Equal(t, false, a.OnDuty)
 }
 
 func Test_Struct_Handles_Pointers(t *testing.T) {

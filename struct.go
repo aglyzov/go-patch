@@ -30,9 +30,6 @@ func Struct(target, patch interface{}) (changed bool, err error) {
 			fields = append(fields, srcField.Fields()...)
 			continue
 		}
-		if srcField.IsZero() {
-			continue // skip zero-value fields
-		}
 
 		var name = srcField.Name()
 		var dstField, ok = dst.FieldOk(name)
