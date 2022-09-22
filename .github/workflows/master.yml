@@ -3,9 +3,9 @@ name: Quality Checks
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   unit-test:
@@ -29,15 +29,15 @@ jobs:
         run: make integration-test
 
   tag-version:
-    # Only triggered when running on main and successful quality check
+    # Only triggered when running on master and successful quality check
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.create-tag.outputs.version }}
     needs: unit-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - id: checkout
-        name: Checkout main branch
+        name: Checkout master branch
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
