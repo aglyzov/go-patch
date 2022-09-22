@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// nolint:errcheck
 func Test_Apply_Ignores_EmptyPatch(t *testing.T) {
 
 	type Target struct {
@@ -31,6 +32,7 @@ func Test_Apply_Ignores_EmptyPatch(t *testing.T) {
 	assert.Equal(t, "unchanged", a.Extra)
 }
 
+// nolint:errcheck
 func Test_Apply_Ignores_UnknownFields(t *testing.T) {
 
 	type Target struct {
@@ -58,6 +60,7 @@ func Test_Apply_Ignores_UnknownFields(t *testing.T) {
 	assert.Equal(t, 123, a.Salary)           // unchanged
 }
 
+// nolint:errcheck
 func Test_Apply_Ignores_UnexportedFields(t *testing.T) {
 
 	type Target struct {
@@ -81,6 +84,7 @@ func Test_Apply_Ignores_UnexportedFields(t *testing.T) {
 	assert.Equal(t, "private", a.unexported)
 }
 
+// nolint:errcheck
 func Test_Apply_ZeroValueFields(t *testing.T) {
 
 	type Target struct {
@@ -108,6 +112,7 @@ func Test_Apply_ZeroValueFields(t *testing.T) {
 	assert.Equal(t, false, a.OnDuty)
 }
 
+// nolint:errcheck
 func Test_Apply_Detects_WrongType(t *testing.T) {
 
 	type Target struct {
@@ -129,6 +134,7 @@ func Test_Apply_Detects_WrongType(t *testing.T) {
 	assert.Equal(t, 123, a.Salary) // unchanged
 }
 
+// nolint:errcheck
 func Test_Apply_Sub_Structs(t *testing.T) {
 	type TargetPerson struct {
 		FirstName string `json:"first_name"`

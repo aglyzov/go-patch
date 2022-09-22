@@ -2,9 +2,10 @@ package patch
 
 import (
 	"fmt"
-	"github.com/fatih/structs"
 	"reflect"
 	"strings"
+
+	"github.com/fatih/structs"
 )
 
 // Apply updates the target struct in-place with non-zero values from the patch struct.

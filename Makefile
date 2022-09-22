@@ -11,7 +11,7 @@ unit-test:
 
 format:
 	@gofmt -l -w $(SRC)
-	@goimports -w -e -local github.com/itsrever/go-patch
+	@goimports -w -e -local github.com/itsrever/go-patch pkg
 
 install-lint-ubuntu:
 	echo Installing yamlint golangci-lint...
