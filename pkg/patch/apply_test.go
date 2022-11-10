@@ -7,8 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// nolint:errcheck
-func Test_Apply_Ignores_EmptyPatch(t *testing.T) {
+func TestApplyIgnoresEmptyPatch(t *testing.T) {
 
 	type Target struct {
 		FirstName string `json:"first_name"`
@@ -16,13 +15,13 @@ func Test_Apply_Ignores_EmptyPatch(t *testing.T) {
 		Salary    int    `json:"salary"`
 		Extra     string `json:"extra"`
 	}
-	var a = Target{
+	a := Target{
 		FirstName: "Anakin",
 		LastName:  "Skywalker",
 		Salary:    123,
 		Extra:     "unchanged",
 	}
-	var chg, err = Apply(&a, map[string]interface{}{})
+	chg, err := Apply(&a, map[string]interface{}{})
 
 	assert.NoError(t, err)
 	assert.False(t, chg)
@@ -32,16 +31,14 @@ func Test_Apply_Ignores_EmptyPatch(t *testing.T) {
 	assert.Equal(t, "unchanged", a.Extra)
 }
 
-// nolint:errcheck
-func Test_Apply_Ignores_UnknownFields(t *testing.T) {
-
+func TestApplyIgnoresUnknownFields(t *testing.T) {
 	type Target struct {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
 		Salary    int    `json:"salary"`
 	}
 
-	var a = Target{
+	a := Target{
 		FirstName: "Anakin",
 		LastName:  "Skywalker",
 		Salary:    123,
@@ -49,7 +46,8 @@ func Test_Apply_Ignores_UnknownFields(t *testing.T) {
 
 	data := `{"middle_name":"Sheev", "perk": "pilot"}`
 	p := make(map[string]interface{})
-	json.Unmarshal([]byte(data), &p)
+	jsonErr := json.Unmarshal([]byte(data), &p)
+	assert.NoError(t, jsonErr)
 
 	var chg, err = Apply(&a, p)
 
@@ -60,33 +58,29 @@ func Test_Apply_Ignores_UnknownFields(t *testing.T) {
 	assert.Equal(t, 123, a.Salary)           // unchanged
 }
 
-// nolint:errcheck
-func Test_Apply_Ignores_UnexportedFields(t *testing.T) {
-
+func TestApplyIgnoresUnexportedFields(t *testing.T) {
 	type Target struct {
 		Exported   string `json:"exported,omitempty"`
 		unexported string
 	}
-	var a = Target{
+	a := Target{
 		Exported:   "stormtrooper",
 		unexported: "private",
 	}
 
 	data := `{"exported":"wookie", "unexported": "leutenant"}`
 	p := make(map[string]interface{})
-	json.Unmarshal([]byte(data), &p)
+	jsonErr := json.Unmarshal([]byte(data), &p)
+	assert.NoError(t, jsonErr)
 
-	var chg, err = Apply(&a, p)
-
+	chg, err := Apply(&a, p)
 	assert.NoError(t, err)
 	assert.True(t, chg)
 	assert.Equal(t, "wookie", a.Exported)
 	assert.Equal(t, "private", a.unexported)
 }
 
-// nolint:errcheck
-func Test_Apply_ZeroValueFields(t *testing.T) {
-
+func TestApplyZeroValueFields(t *testing.T) {
 	type Target struct {
 		Name   string `json:"name"`
 		Salary int64  `json:"salary"`
@@ -101,10 +95,10 @@ func Test_Apply_ZeroValueFields(t *testing.T) {
 
 	data := `{"name":"Chubacca", "salary": 0, "on_duty": false}`
 	p := make(map[string]interface{})
-	json.Unmarshal([]byte(data), &p)
+	jsonErr := json.Unmarshal([]byte(data), &p)
+	assert.NoError(t, jsonErr)
 
-	var chg, err = Apply(&a, p)
-
+	chg, err := Apply(&a, p)
 	assert.NoError(t, err)
 	assert.True(t, chg)
 	assert.Equal(t, "Chubacca", a.Name)
@@ -112,9 +106,7 @@ func Test_Apply_ZeroValueFields(t *testing.T) {
 	assert.Equal(t, false, a.OnDuty)
 }
 
-// nolint:errcheck
-func Test_Apply_Detects_WrongType(t *testing.T) {
-
+func TestApplyDetectsWrongType(t *testing.T) {
 	type Target struct {
 		Name   string `json:"name"`
 		Salary int    `json:"salary"`
@@ -126,16 +118,15 @@ func Test_Apply_Detects_WrongType(t *testing.T) {
 
 	data := `{"name":"Darth Vader", "salary": "euros"}`
 	p := make(map[string]interface{})
-	json.Unmarshal([]byte(data), &p)
+	jsonErr := json.Unmarshal([]byte(data), &p)
+	assert.NoError(t, jsonErr)
 
-	var _, err = Apply(&a, p)
-
+	_, err := Apply(&a, p)
 	assert.Error(t, err)
 	assert.Equal(t, 123, a.Salary) // unchanged
 }
 
-// nolint:errcheck
-func Test_Apply_Sub_Structs(t *testing.T) {
+func TestApplySubStructs(t *testing.T) {
 	type TargetPerson struct {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
@@ -155,13 +146,47 @@ func Test_Apply_Sub_Structs(t *testing.T) {
 
 	data := `{"contact": {"first_name":"Darth", "last_name": "Vader"}, "salary": 100500}`
 	p := make(map[string]interface{})
-	json.Unmarshal([]byte(data), &p)
+	jsonErr := json.Unmarshal([]byte(data), &p)
+	assert.NoError(t, jsonErr)
 
-	var chg, err = Apply(&a, p)
-
+	chg, err := Apply(&a, p)
 	assert.NoError(t, err)
 	assert.True(t, chg)
 	assert.Equal(t, "Darth", a.Contact.FirstName)
 	assert.Equal(t, "Vader", a.Contact.LastName)
 	assert.Equal(t, 100500, a.Salary)
+}
+
+type Position int32
+
+const (
+	Position_None    Position = 0
+	Position_Padawan Position = 1
+	Position_Sith    Position = 2
+)
+
+func TestEnums(t *testing.T) {
+	type Person struct {
+		FirstName string   `json:"first_name"`
+		LastName  string   `json:"last_name"`
+		Position  Position `json:"position"`
+	}
+
+	var a = Person{
+		FirstName: "Darth",
+		LastName:  "Vader",
+		Position:  Position_None,
+	}
+
+	data := `{"position": 2}`
+	p := make(map[string]interface{})
+	jsonErr := json.Unmarshal([]byte(data), &p)
+	assert.NoError(t, jsonErr)
+
+	chg, err := Apply(&a, p)
+	assert.NoError(t, err)
+	assert.True(t, chg)
+	assert.Equal(t, "Darth", a.FirstName)
+	assert.Equal(t, "Vader", a.LastName)
+	assert.Equal(t, Position_Sith, a.Position)
 }
